@@ -20,6 +20,8 @@ import { Prisma } from '@prisma/client';
 import { loginDTO } from './dto/login.dto';
 import { resetPasswordDTO } from './dto/resetPassword.dto';
 
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/binary';
+
 export type UserNoPassword = Omit<loginDTO, 'password'>;
 
 @Injectable()
@@ -55,7 +57,7 @@ export class AuthService {
 
       return token;
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error instanceof PrismaClientKnownRequestError) {
         if (error.code === PrismaError.UniqueConstraintViolation) {
           throw new HttpException(
             {
@@ -96,7 +98,7 @@ export class AuthService {
 
       return createUser;
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error instanceof PrismaClientKnownRequestError) {
         if (error.code === PrismaError.UniqueConstraintViolation) {
           throw new HttpException(
             {
@@ -131,7 +133,7 @@ export class AuthService {
 
       await this.mailSerivce.sendRecoveryCode(recoveryCode);
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error instanceof PrismaClientKnownRequestError) {
         if (error.code === PrismaError.UniqueConstraintViolation) {
           throw new HttpException(
             {
@@ -186,7 +188,7 @@ export class AuthService {
 
       return await this.grantAccessToken(user, true);
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error instanceof PrismaClientKnownRequestError) {
         if (error.code === PrismaError.UniqueConstraintViolation) {
           throw new HttpException(
             {
@@ -236,7 +238,7 @@ export class AuthService {
         throw new AuthExceptions.TokenExpired();
       } else if (error instanceof JsonWebTokenError) {
         throw new AuthExceptions.TokenInvalid();
-      } else if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      } else if (error instanceof PrismaClientKnownRequestError) {
         switch (error.code) {
           case PrismaError.RelatedRecordNotFound:
             throw new AuthExceptions.UserNotFound();
@@ -288,7 +290,7 @@ export class AuthService {
         where: whereClause,
       });
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error instanceof PrismaClientKnownRequestError) {
         switch (error.code) {
           case PrismaError.RelatedRecordNotFound:
             throw new AuthExceptions.UserNotFound();
