@@ -49,7 +49,7 @@ export class AuthController {
   @UseGuards(JwtGuard)
   async resetPassword(
     @Body() resetPasswordData: resetPasswordDTO,
-    @Req() request: Request,
+    @Req() request,
   ) {
     return await this.authService.resetUserPassword(resetPasswordData, request);
   }
