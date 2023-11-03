@@ -17,8 +17,6 @@ COPY . .
 # Build the NestJS application
 RUN yarn build
 
-# Expose the port your application is running on
-EXPOSE 3000
 
 # Define the command to run your NestJS application
 CMD ["yarn", "start:migrate:prod"]

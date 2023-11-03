@@ -3,9 +3,9 @@ services:
   app:
     image: maik3/api-portfolio:latest
     ports:
-      - '7045:80'
+      - '80:80'
     environment:
-      - DATABASE_URL=mysql://98m9617isc6qvnu4rabq:pscale_pw_RGCWepZiiKAgcieY1GkFXlqyuKgh7Ksi6SkQDIFHFuZ@aws.connect.psdb.cloud/data-pt?sslaccept=strict
+      - DATABASE_URL=mysql://1vs84rm9785mfdt765mg:pscale_pw_nVqt4zeiv2CUZzrhmKHOQhukA6vRePJM0WY3EsHOLeV@aws.connect.psdb.cloud/data-pt?sslaccept=strict
       - JWT_SECRET=NHgy9vADWPudLO6ZeCCuO4gVcMa80Kbx
       - SALT_ROUNDS=10
       - JWT_ACCESS_TIME=1h
