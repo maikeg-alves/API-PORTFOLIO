@@ -398,3 +398,9 @@ Temporary Items
 dist
 .webpack
 .serverless/**/*.zip
+
+# docker
+docker-compose.yaml
+docker-compose.yml
+
+docker-compose.yml
