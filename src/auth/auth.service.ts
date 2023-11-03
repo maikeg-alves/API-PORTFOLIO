@@ -10,7 +10,6 @@ import { AccessPayload, FullAccessPayload, TokenType } from './dto/jwt.dto';
 import { JsonWebTokenError, TokenExpiredError } from 'jsonwebtoken';
 import * as AuthExceptions from './exceptions/auth.execptions';
 import { PrismaError } from 'src/prisma/error/prisma.erros';
-import { Prisma } from '@prisma/client';
 import { loginDTO } from './dto/login.dto';
 import { resetPasswordDTO } from './dto/resetPassword.dto';
 

@@ -1,10 +1,7 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 
-import { Reflector } from '@nestjs/core';
 import { AuthService } from '../auth.service';
 import { Unauthorized } from '../exceptions/auth.execptions';
-import { FullAccessPayload } from '../dto/jwt.dto';
-import { ALLOW_RESTRICTED_METADATA } from '../decorators/allow-restricted.decorator';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 
