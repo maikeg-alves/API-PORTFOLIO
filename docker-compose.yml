@@ -5,8 +5,10 @@ services:
     ports:
       - '7045:80'
     environment:
-      - CONNECTION_STRING=
-      - AUTH_DOMAIN=
-      - AUTH_AUDIENCE=
-      - AUTH_CLIENT_ID=
-      - NODE_ENV=
+      - DATABASE_URL=mysql://98m9617isc6qvnu4rabq:pscale_pw_RGCWepZiiKAgcieY1GkFXlqyuKgh7Ksi6SkQDIFHFuZ@aws.connect.psdb.cloud/data-pt?sslaccept=strict
+      - JWT_SECRET=NHgy9vADWPudLO6ZeCCuO4gVcMa80Kbx
+      - SALT_ROUNDS=10
+      - JWT_ACCESS_TIME=1h
+      - JWT_REFRESH_TIME=1h
+      - EMAIL_FROM=piwozishop@gmail.com
+      - EMAIL_PASS=jwzdikoeoyczpllg
