@@ -1,11 +1,12 @@
 # Use the official Node.js image as a base image
-FROM node:16
+FROM node:18
 
 # Set the working directory in the container
 WORKDIR /app
 
 # Copy package.json and yarn.lock to the container
 COPY package.json yarn.lock ./
+COPY prisma ./prisma/
 
 # Install project dependencies using Yarn
 RUN yarn install
