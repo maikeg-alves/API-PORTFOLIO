@@ -17,7 +17,12 @@ export enum StandardExceptionReason {
   TECH_CREATION_FAILED = 'TechCreationFailed',
   TECH_UPDATE_FAILED = 'TechUpdateFailed',
   TECH_DELETION_FAILED = 'TechDeletionFailed',
+  PROJECT_NOT_FOUND = 'ProjectNotFound',
+  PROJECT_CREATION_FAILED = 'ProjectCreationFailed',
+  PROJECT_UPDATE_FAILED = 'ProjectUpdateFailed',
+  PROJECT_DELETION_FAILED = 'ProjectDeletionFailed',
 }
+
 export interface StandardExceptionBody {
   reason: StandardExceptionReason | string;
   message: string;

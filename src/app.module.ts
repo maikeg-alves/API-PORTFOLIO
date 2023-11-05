@@ -17,12 +17,6 @@ import { JwtModule } from '@nestjs/jwt';
       expandVariables: true,
       load: NAMESPACES,
     }),
-    /* JwtModule.registerAsync({
-      inject: [ConfigService],
-      useFactory: async (config: ConfigService) => ({
-        secret: config.get<string>('auth.jwt.secret'),
-      }),
-    }), */
     AuthModule,
     PrismaModule,
     MailModule,
