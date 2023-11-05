@@ -2,20 +2,20 @@ import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 
 import { AuthService } from '../auth.service';
 import { Unauthorized } from '../exceptions/auth.execptions';
-import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
+import { ALLOW_RESTRICTED_METADATA } from '../decorators/allow-restricted.decorator';
+import { Reflector } from '@nestjs/core';
 
 @Injectable()
 export class JwtGuard implements CanActivate {
   constructor(
-    private jwtService: JwtService,
-    private readonly config: ConfigService,
+    private readonly reflector: Reflector,
     private readonly authService: AuthService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
+
     if (!token) {
       throw new Unauthorized();
     }
@@ -24,11 +24,21 @@ export class JwtGuard implements CanActivate {
       const payload = await this.authService.useAccessToken(token);
 
       request['user'] = payload;
-    } catch {
+
+      if (payload.restricted) {
+        const allowed = this.reflector.get<boolean | undefined>(
+          ALLOW_RESTRICTED_METADATA,
+          context.getHandler(),
+        );
+
+        if (!allowed) {
+          return false;
+        }
+      }
+      return true;
+    } catch (error) {
       throw new Unauthorized();
     }
-
-    return true;
   }
 
   private extractTokenFromHeader(request: Request): string | undefined {
@@ -42,8 +52,9 @@ export class JwtGuard implements CanActivate {
 
     return type === 'Bearer' ? token : undefined;
   }
+}
 
-  /*  constructor(
+/*  constructor(
     private readonly reflector: Reflector,
     private readonly authService: AuthService,
   ) {}
@@ -81,4 +92,3 @@ export class JwtGuard implements CanActivate {
       throw new Unauthorized();
     }
   } */
-}

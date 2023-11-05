@@ -6,7 +6,12 @@ import { ConfigService } from '@nestjs/config';
 import { UserDTO } from './dto/user.dto';
 import { JwtService } from '@nestjs/jwt';
 import { MailService } from 'src/mail/mail.service';
-import { AccessPayload, FullAccessPayload, TokenType } from './dto/jwt.dto';
+import {
+  AccessPayload,
+  FullAccessPayload,
+  RefreshPayload,
+  TokenType,
+} from './dto/jwt.dto';
 import { JsonWebTokenError, TokenExpiredError } from 'jsonwebtoken';
 import * as AuthExceptions from './exceptions/auth.execptions';
 import { PrismaError } from 'src/prisma/error/prisma.erros';
@@ -14,6 +19,7 @@ import { loginDTO } from './dto/login.dto';
 import { resetPasswordDTO } from './dto/resetPassword.dto';
 
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/binary';
+import { generateFingerprint, sha256 } from 'src/common/utils/crypto';
 
 export type UserNoPassword = Omit<loginDTO, 'password'>;
 
@@ -46,7 +52,7 @@ export class AuthService {
         throw new AuthExceptions.InvalidCredentials();
       }
 
-      const token = await this.grantAccessToken(user, true);
+      const token = await this.grantAccessToken(user);
 
       return token;
     } catch (error) {
@@ -85,7 +91,7 @@ export class AuthService {
         },
       });
 
-      const token = await this.grantAccessToken(createUser, true);
+      const token = await this.grantAccessToken(createUser);
 
       await this.mailSerivce.sendUserConfirmation(createUser, token);
 
@@ -179,7 +185,7 @@ export class AuthService {
         throw new AuthExceptions.UserNotFound();
       }
 
-      return await this.grantAccessToken(user, true);
+      return await this.grantAccessToken(user);
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
         if (error.code === PrismaError.UniqueConstraintViolation) {
@@ -202,9 +208,15 @@ export class AuthService {
     try {
       const token = request.headers.authorization.replace('Bearer ', '');
 
-      const verifiedToken = await this.jwtService.verifyAsync(token);
+      const verifiedToken: AccessPayload = await this.jwtService.verifyAsync(
+        token,
+      );
 
-      const { subject, email } = verifiedToken;
+      const { email, id } = await this.prisma.user.findUnique({
+        where: {
+          email: verifiedToken.username,
+        },
+      });
 
       const hashedPassword = await bcrypt.hash(
         resetPasswordData.newPassword,
@@ -213,7 +225,7 @@ export class AuthService {
 
       const updateUserPass = await this.prisma.user.update({
         where: {
-          id: subject,
+          id: id,
           email: email,
         },
         data: {
@@ -296,13 +308,17 @@ export class AuthService {
   }
 
   async grantAccessToken(user: UserDTO, restricted?: boolean): Promise<string> {
-    return await this.jwtService.signAsync(<AccessPayload>{
-      t: TokenType.ACCESS,
-      username: user.email,
-      restricted,
-      subject: user.id,
-      expiresIn: `${this.config.get<string>('auth.jwt.time.access')}s`,
-    });
+    return await this.jwtService.signAsync(
+      <AccessPayload>{
+        t: TokenType.ACCESS,
+        username: user.email,
+        restricted,
+      },
+      {
+        subject: user.email,
+        expiresIn: `${this.config.get<string>('auth.jwt.time.access')}s`,
+      },
+    );
   }
 
   async useAccessToken(token: string): Promise<FullAccessPayload> {
