@@ -142,7 +142,7 @@ export class TechService {
 
       if (!getTech) throw new TechExceptions.TechNotFoundException();
 
-      const deleteTech = await this.prisma.tech.findUniqueOrThrow({
+      const deleteTech = await this.prisma.tech.delete({
         where: { id: +id },
       });
 
