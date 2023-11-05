@@ -10,11 +10,17 @@ export class TechService {
 
   async getTechs(): Promise<TechDTO[] | null> {
     try {
-      const tech = await this.prisma.tech.findMany();
+      const getTechs = await this.findTech();
 
-      if (!tech) throw new TechExceptions.TechNotFoundException();
+      if (
+        !getTechs ||
+        (Array.isArray(getTechs) && getTechs.length === 0) ||
+        !Array.isArray(getTechs)
+      ) {
+        throw new TechExceptions.TechNotFoundException();
+      }
 
-      return tech;
+      return getTechs;
     } catch (error) {
       switch (error.code) {
         case PrismaError.UniqueConstraintViolation: {
@@ -37,9 +43,10 @@ export class TechService {
 
   async getOneTech(id: string): Promise<TechDTO | null> {
     try {
-      const getTech = await this.findTechById(id);
+      const getTech = await this.findTech(id);
 
-      if (!getTech) throw new TechExceptions.TechNotFoundException();
+      if (!getTech || Array.isArray(getTech))
+        throw new TechExceptions.TechNotFoundException();
 
       return getTech;
     } catch (error) {
@@ -95,7 +102,7 @@ export class TechService {
 
   async updateTech(techData: TechDTO, id: string): Promise<TechDTO | null> {
     try {
-      const getTech = await this.findTechById(id);
+      const getTech = await this.findTech(id);
 
       if (!getTech) throw new TechExceptions.TechNotFoundException();
 
@@ -131,7 +138,7 @@ export class TechService {
 
   async deleteTech(id: string): Promise<TechDTO | null> {
     try {
-      const getTech = await this.findTechById(id);
+      const getTech = await this.findTech(id);
 
       if (!getTech) throw new TechExceptions.TechNotFoundException();
 
@@ -162,22 +169,40 @@ export class TechService {
     }
   }
 
-  async findTechById(techId: string) {
+  async findTech(techId?: string): Promise<TechDTO | TechDTO[] | null> {
     try {
-      return await this.prisma.tech.findUnique({
+      if (!techId) {
+        return (await this.prisma.tech.findMany()) as TechDTO[] | null;
+      }
+      return (await this.prisma.tech.findUnique({
         where: { id: +techId },
-      });
+      })) as TechDTO | null;
     } catch (error) {
-      if (error.code === 'P2025') {
-        throw new HttpException(
-          {
-            reason: 'TechNotFound',
-            message: 'Tech não encontrado.',
-          },
-          HttpStatus.NOT_FOUND,
-        );
-      } else {
-        throw error;
+      console.error(error.code);
+      switch (error.code) {
+        case PrismaError.UniqueConstraintViolation: {
+          throw new HttpException(
+            {
+              reason: 'UniqueConstraintViolation',
+              message: `Tech with the provided ${this.prisma.offendingFields(
+                (error.meta as any).target,
+              )} already exists.`,
+            },
+            HttpStatus.CONFLICT,
+          );
+        }
+        case PrismaError.TableDoesNotExist: {
+          throw new HttpException(
+            {
+              reason: 'TableDoesNotExist',
+              message: `No data was found in the Techs table or the table does not exist`,
+            },
+            HttpStatus.CONFLICT,
+          );
+        }
+        default: {
+          throw error;
+        }
       }
     }
   }
