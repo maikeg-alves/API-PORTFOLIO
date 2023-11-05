@@ -37,9 +37,7 @@ export class TechService {
 
   async getOneTech(id: string): Promise<TechDTO | null> {
     try {
-      const getTech = await this.prisma.tech.findUnique({
-        where: { id: +id },
-      });
+      const getTech = await this.findTechById(id);
 
       if (!getTech) throw new TechExceptions.TechNotFoundException();
 
@@ -97,9 +95,7 @@ export class TechService {
 
   async updateTech(techData: TechDTO, id: string): Promise<TechDTO | null> {
     try {
-      const getTech = await this.prisma.tech.findUnique({
-        where: { id: +id },
-      });
+      const getTech = await this.findTechById(id);
 
       if (!getTech) throw new TechExceptions.TechNotFoundException();
 
@@ -135,9 +131,7 @@ export class TechService {
 
   async deleteTech(id: string): Promise<TechDTO | null> {
     try {
-      const getTech = await this.prisma.tech.findUnique({
-        where: { id: +id },
-      });
+      const getTech = await this.findTechById(id);
 
       if (!getTech) throw new TechExceptions.TechNotFoundException();
 
@@ -164,6 +158,26 @@ export class TechService {
         default: {
           throw error;
         }
+      }
+    }
+  }
+
+  async findTechById(techId: string) {
+    try {
+      return await this.prisma.tech.findUnique({
+        where: { id: +techId },
+      });
+    } catch (error) {
+      if (error.code === 'P2025') {
+        throw new HttpException(
+          {
+            reason: 'TechNotFound',
+            message: 'Tech não encontrado.',
+          },
+          HttpStatus.NOT_FOUND,
+        );
+      } else {
+        throw error;
       }
     }
   }
