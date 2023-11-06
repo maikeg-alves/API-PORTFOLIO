@@ -46,10 +46,3 @@ jobs:
             sudo docker pull $DOCKER_USERNAME/$REPO_NAME:latest &&
             sudo docker-compose -p $REPO_NAME -f ~/$REPO_NAME-compose up -d
           "
-      - name: Check container logs 👀
-        run: |
-          sleep 10
-          container_name="$REPO_NAME_app_1"
-          ssh -i ~/.ssh/id_rsa.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_IP_ADDRESS "
-             sudo docker logs $container_name
-          "
