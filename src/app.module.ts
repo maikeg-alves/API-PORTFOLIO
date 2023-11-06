@@ -7,6 +7,8 @@ import { MailModule } from './mail/mail.module';
 import { ProjectsModule } from './projects/projects.module';
 import { TechModule } from './tech/tech.module';
 import { JwtModule } from '@nestjs/jwt';
+import { GithubService } from './github/github.service';
+import { GithubModule } from './github/github.module';
 
 /* @Global() */
 @Module({
@@ -22,6 +24,7 @@ import { JwtModule } from '@nestjs/jwt';
     MailModule,
     ProjectsModule,
     TechModule,
+    GithubModule,
   ],
 })
 export class AppModule {}

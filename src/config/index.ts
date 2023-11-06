@@ -2,17 +2,17 @@
 import { appConfig } from './app.config'; */
 import { authConfig } from './auth/auth.config';
 import { mailConfig } from './mail/mail.config';
-/* import { redisConfig } from './redis.config';
- */
+import { gitHubConfig } from './github/github.config';
 
 const NAMESPACES = [
   /* appConfig,
   databaseConfig,
   redisConfig, */
+  gitHubConfig,
   authConfig,
 ];
 
-const CONFIG = { mailConfig: mailConfig };
+const CONFIG = { mailConfig: mailConfig, gitHubConfig: gitHubConfig };
 
 export {
   NAMESPACES,
@@ -20,5 +20,6 @@ export {
   /* appConfig,
   databaseConfig,
   redisConfig, */
+  gitHubConfig,
   authConfig,
 };

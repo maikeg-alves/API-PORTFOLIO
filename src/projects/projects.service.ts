@@ -7,6 +7,7 @@ import { TechService } from 'src/tech/tech.service';
 import { ProjectAndTechsDTO } from './dto/projectsAndTechs.dto';
 import { TechDTO } from 'src/tech/dto/tech.dto';
 import { ProjectTechDTO } from './dto/projectTech.dto';
+import { reduceAsync } from '@strapi/utils';
 
 @Injectable()
 export class ProjectsService {
