@@ -19,7 +19,7 @@ CREATE TABLE `projects` (
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
     `name` VARCHAR(191) NOT NULL,
-    `description` VARCHAR(191) NOT NULL,
+    `description` TEXT NOT NULL,
     `thumbnail_url` VARCHAR(191) NOT NULL,
     `githubRepoId` VARCHAR(191) NOT NULL,
     `githubCreatedAt` DATETIME(3) NOT NULL,
