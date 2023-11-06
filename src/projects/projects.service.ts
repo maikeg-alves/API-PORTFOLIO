@@ -7,13 +7,14 @@ import { TechService } from 'src/tech/tech.service';
 import { ProjectAndTechsDTO } from './dto/projectsAndTechs.dto';
 import { TechDTO } from 'src/tech/dto/tech.dto';
 import { ProjectTechDTO } from './dto/projectTech.dto';
-import { reduceAsync } from '@strapi/utils';
+import { GithubService } from 'src/github/github.service';
 
 @Injectable()
 export class ProjectsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly techService: TechService,
+    private readonly githubService: GithubService,
   ) {}
 
   async getProjects(viewTechs: boolean): Promise<ProjectDTO[] | null> {
@@ -83,14 +84,25 @@ export class ProjectsService {
 
   async createProject(projectData: ProjectAndTechsDTO): Promise<ProjectDTO> {
     try {
+      const githubRepo = await this.githubService.getRepo(
+        projectData.githubRepoId,
+      );
+
       const techsChecked = await this.checkingTechIds(projectData.techs);
 
+      const description = projectData.description
+        ? projectData.description
+        : githubRepo.description;
+
+      console.log(githubRepo.description.length);
       const projectCreate = await this.prisma.project.create({
         data: {
           ...projectData,
-          githubCreatedAt: new Date(), //TODO: manter até fazer a integração com github
-          githubUpdatedAt: new Date(), //TODO: manter até fazer a integração com github
-
+          description: description ?? null,
+          linkRepo: githubRepo.html_url,
+          liveSite: githubRepo.homepage,
+          githubCreatedAt: new Date(githubRepo.created_at),
+          githubUpdatedAt: new Date(githubRepo.pushed_at),
           techs: {
             connect: techsChecked,
           },
@@ -126,6 +138,10 @@ export class ProjectsService {
     id: string,
   ): Promise<ProjectDTO | null> {
     try {
+      const githubRepo = await this.githubService.getRepo(
+        projectData.githubRepoId,
+      );
+
       const techsChecked = await this.checkingTechIds(projectData.techs);
 
       const getProject = (await this.findProject(true, id)) as ProjectTechDTO;
@@ -146,10 +162,19 @@ export class ProjectsService {
         return !techsChecked.includes(tech.id);
       });
 
+      const description = projectData.description
+        ? projectData.description
+        : githubRepo.description;
+
       const updateProject = await this.prisma.project.update({
         where: { id: +id },
         data: {
           ...projectData,
+          description: description ?? null,
+          linkRepo: githubRepo.html_url,
+          liveSite: githubRepo.homepage,
+          githubCreatedAt: new Date(githubRepo.created_at),
+          githubUpdatedAt: new Date(githubRepo.pushed_at),
           techs: {
             connect: techsToAdd.map((id) => id),
             disconnect: techsToRemove.map((id) => id),

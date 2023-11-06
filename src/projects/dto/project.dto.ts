@@ -4,6 +4,7 @@ export class ProjectDTO {
   @IsString()
   name: string;
 
+  @IsOptional()
   @IsString()
   description: string;
 
@@ -21,9 +22,11 @@ export class ProjectDTO {
   @IsDate()
   githubUpdatedAt: Date;
 
+  @IsOptional()
   @IsString()
   linkRepo: string;
 
+  @IsOptional()
   @IsString()
   liveSite: string;
 }
