@@ -51,8 +51,5 @@ jobs:
           sleep 10
           container_name="$REPO_NAME_app_1"
           ssh -i ~/.ssh/id_rsa.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_IP_ADDRESS "
-             sudo docker logs -f $container_name &
-             PID=$! 
-             sleep 10
-             kill -9 $PID
+             sudo docker logs $container_name
           "
