@@ -19,4 +19,4 @@ RUN yarn build
 
 
 # Define the command to run your NestJS application
-CMD ["yarn", "start:migrate:prod"]
+CMD ["yarn", "start:prod"]

@@ -400,6 +400,6 @@ dist
 .serverless/**/*.zip
 
 # docker
-docker-compose.yaml
 docker-compose.yml
-docker-compose.yml
+docker-compose-dev.yml
+docker-compose-dev.yml
