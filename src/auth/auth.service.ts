@@ -6,12 +6,7 @@ import { ConfigService } from '@nestjs/config';
 import { UserDTO } from './dto/user.dto';
 import { JwtService } from '@nestjs/jwt';
 import { MailService } from 'src/mail/mail.service';
-import {
-  AccessPayload,
-  FullAccessPayload,
-  RefreshPayload,
-  TokenType,
-} from './dto/jwt.dto';
+import { AccessPayload, FullAccessPayload, TokenType } from './dto/jwt.dto';
 import { JsonWebTokenError, TokenExpiredError } from 'jsonwebtoken';
 import * as AuthExceptions from './exceptions/auth.execptions';
 import { PrismaError } from 'src/prisma/error/prisma.erros';
@@ -19,7 +14,6 @@ import { loginDTO } from './dto/login.dto';
 import { resetPasswordDTO } from './dto/resetPassword.dto';
 
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/binary';
-import { generateFingerprint, sha256 } from 'src/common/utils/crypto';
 
 export type UserNoPassword = Omit<loginDTO, 'password'>;
 
@@ -82,14 +76,18 @@ export class AuthService {
     try {
       delete registrationData.password;
 
-      const createUser = await this.prisma.user.create({
-        data: {
-          ...registrationData,
-          hash: hashedPassword,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-      });
+      const createUser = await this.prisma.user
+        .create({
+          data: {
+            ...registrationData,
+            hash: hashedPassword,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+        })
+        .catch((e) => {
+          throw e;
+        });
 
       const token = await this.grantAccessToken(createUser);
 
@@ -97,25 +95,26 @@ export class AuthService {
 
       return createUser;
     } catch (error) {
-      if (error instanceof PrismaClientKnownRequestError) {
-        if (error.code === PrismaError.UniqueConstraintViolation) {
-          throw new HttpException(
-            {
-              reason: 'UniqueConstraintViolation',
-              message: `User with the provided ${this.prisma.offendingFields(
-                (error.meta as any).target,
-              )} already exists.`,
-            },
-            HttpStatus.CONFLICT,
-          );
-        }
+      switch (error.code) {
+        case PrismaError.UniqueConstraintViolation:
+          throw new AuthExceptions.UserAlreadyExists();
+        default:
+          throw new AuthExceptions.UnknownError();
       }
-      throw error;
     }
   }
 
   async recoveryUserPassword(user: UserNoPassword): Promise<void> {
-    const { email, id } = await this.verifyUserEmail(user.email);
+    if (!user.email) {
+      throw new AuthExceptions.MissingParameters();
+    }
+
+    const userData = await this.verifyUserEmail(user.email);
+
+    if (!userData) {
+      throw new AuthExceptions.UserNotFound();
+    }
+
     const code = this.generateRandomCode(6);
     const expirationMilliseconds = new Date().getTime() + 60 * 60 * 1000;
     const expirationDate = new Date(expirationMilliseconds);
@@ -123,8 +122,8 @@ export class AuthService {
     try {
       const recoveryCode = await this.prisma.passwordReset.create({
         data: {
-          userId: id,
-          userEmail: email,
+          userId: userData.id,
+          userEmail: userData.email,
           code: code,
           expiration: expirationDate,
         },
@@ -132,20 +131,15 @@ export class AuthService {
 
       await this.mailSerivce.sendRecoveryCode(recoveryCode);
     } catch (error) {
-      if (error instanceof PrismaClientKnownRequestError) {
-        if (error.code === PrismaError.UniqueConstraintViolation) {
-          throw new HttpException(
-            {
-              reason: 'UniqueConstraintViolation',
-              message: `User with the provided ${this.prisma.offendingFields(
-                (error.meta as any).target,
-              )} already exists.`,
-            },
-            HttpStatus.CONFLICT,
-          );
-        }
+      switch (error.code) {
+        case PrismaError.RelatedRecordNotFound:
+          throw new AuthExceptions.UserNotFound();
+        case PrismaError.UniqueConstraintViolation:
+          throw new AuthExceptions.CodeSeend();
+        default:
+          console.error(error);
+          throw new AuthExceptions.UnknownError();
       }
-      throw error;
     }
   }
 
@@ -208,9 +202,16 @@ export class AuthService {
     try {
       const token = request.headers.authorization.replace('Bearer ', '');
 
-      const verifiedToken: AccessPayload = await this.jwtService.verifyAsync(
-        token,
-      );
+      const verifiedToken: AccessPayload = await this.jwtService
+        .verifyAsync(token)
+        .catch((e) => {
+          if (e instanceof TokenExpiredError) {
+            throw new AuthExceptions.TokenExpired();
+          } else if (e instanceof JsonWebTokenError) {
+            throw new AuthExceptions.TokenInvalid();
+          }
+          throw e;
+        });
 
       const { email, id } = await this.prisma.user.findUnique({
         where: {
@@ -256,54 +257,54 @@ export class AuthService {
   }
 
   async verifyUserEmailByToken(token: string) {
-    const { subject, email } = await this.jwtService
-      .verifyAsync(token)
-      .catch((e) => {
-        if (e instanceof TokenExpiredError) {
-          throw new AuthExceptions.TokenExpired();
-        } else if (e instanceof JsonWebTokenError) {
-          throw new AuthExceptions.TokenInvalid();
-        }
-        throw e;
-      });
-
-    return this.verifyUserEmail(email, subject);
-  }
-
-  async verifyUserEmail(email: string, id?: string): Promise<UserDTO> {
-    const whereClause = id ? { id: +id, email: email } : { email: email };
+    if (!token) {
+      throw new AuthExceptions.MissingParameters();
+    }
 
     try {
-      const user = await this.prisma.user.findUnique({
-        where: whereClause,
-      });
+      const { subject, email } = await this.jwtService.verifyAsync(token);
 
-      if (!user) {
-        throw new AuthExceptions.UserNotFound();
+      return this.verifyUserEmail(email, subject);
+    } catch (error) {
+      if (error.name === 'TokenExpiredError') {
+        throw new AuthExceptions.TokenExpired();
+      } else if (error.name === 'JsonWebTokenError') {
+        throw new AuthExceptions.TokenInvalid();
+      }
+      throw error;
+    }
+  }
+
+  async verifyUserEmail(email: string, id?: string): Promise<UserDTO | null> {
+    try {
+      if (!email && !id) {
+        throw new AuthExceptions.MissingParameters();
       }
 
-      if (id) {
-        return await this.prisma.user.update({
-          data: {
-            activated: true,
+      if (email) {
+        return await this.prisma.user.findUnique({
+          where: {
+            email: email,
           },
-          where: whereClause,
         });
       }
 
-      return await this.prisma.user.findUnique({
-        where: whereClause,
+      return await this.prisma.user.update({
+        data: {
+          activated: true,
+        },
+        where: {
+          id: +id,
+          email: email,
+        },
       });
     } catch (error) {
-      if (error instanceof PrismaClientKnownRequestError) {
-        switch (error.code) {
-          case PrismaError.RelatedRecordNotFound:
-            throw new AuthExceptions.UserNotFound();
-          default:
-            throw new AuthExceptions.UnknownError();
-        }
+      switch (error.code) {
+        case PrismaError.RelatedRecordNotFound:
+          throw new AuthExceptions.UserNotFound();
+        default:
+          throw new AuthExceptions.UnknownError();
       }
-      throw error;
     }
   }
 

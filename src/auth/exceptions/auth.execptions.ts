@@ -1,9 +1,8 @@
+import { HttpStatus } from '@nestjs/common';
 import {
   StandardException,
   StandardExceptionReason,
-} from './standard-exception.mixin';
-
-import { HttpStatus } from '@nestjs/common';
+} from 'src/common/exceptions/standard-exception';
 
 export const Unauthorized = StandardException(
   {
@@ -35,6 +34,14 @@ export const UserDisabled = StandardException(
     message: `This user has been marked inactive. This can be corrected by an administrator.`,
   },
   HttpStatus.FORBIDDEN,
+);
+
+export const UserAlreadyExists = StandardException(
+  {
+    reason: StandardExceptionReason.USER_ALREADY_EXISTS,
+    message: `The user with the provided email already exists.`,
+  },
+  HttpStatus.CONFLICT,
 );
 
 export const InvalidCredentials = StandardException(
@@ -109,12 +116,26 @@ export const CodeIncorrect = StandardException(
   HttpStatus.UNAUTHORIZED,
 );
 
-export const UnknownError = (message?: string) => {
-  StandardException(
-    {
-      reason: StandardExceptionReason.UNKNOWNERROR,
-      message: message || `An unknown error has occurred.`,
-    },
-    HttpStatus.BAD_REQUEST,
-  );
-};
+export const CodeSeend = StandardException(
+  {
+    reason: StandardExceptionReason.UNKNOWNERROR, // Você pode ajustar a razão conforme necessário
+    message: `A recovery has already been requested for this email.`,
+  },
+  HttpStatus.BAD_REQUEST,
+);
+
+export const UnknownError = StandardException(
+  {
+    reason: StandardExceptionReason.UNKNOWNERROR,
+    message: `An unknown error has occurred.`,
+  },
+  HttpStatus.BAD_REQUEST,
+);
+
+export const MissingParameters = StandardException(
+  {
+    reason: StandardExceptionReason.MISSING_PARAMETERS,
+    message: `One or more required parameters are missing or nonexistent.`,
+  },
+  HttpStatus.BAD_REQUEST, // Use HttpStatus.BAD_REQUEST to indicate a client-side error
+);

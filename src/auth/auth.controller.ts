@@ -30,7 +30,7 @@ export class AuthController {
     return await this.authService.signUp(registrationData);
   }
 
-  @Get('confirm')
+  @Get('confirm/email')
   async verifyUserEmailByToken(@Query('token') token: string) {
     return this.authService.verifyUserEmailByToken(token);
   }

@@ -22,6 +22,8 @@ export enum StandardExceptionReason {
   PROJECT_UPDATE_FAILED = 'ProjectUpdateFailed',
   PROJECT_DELETION_FAILED = 'ProjectDeletionFailed',
   REPOSITORY_NOT_FOUND = 'RepositoryNotFoud',
+  USER_ALREADY_EXISTS = 'UserAlreadyExists',
+  MISSING_PARAMETERS = 'MissingParameters',
 }
 
 export interface StandardExceptionBody {

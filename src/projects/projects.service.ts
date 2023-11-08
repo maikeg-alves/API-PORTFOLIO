@@ -94,7 +94,6 @@ export class ProjectsService {
         ? projectData.description
         : githubRepo.description;
 
-      console.log(githubRepo.description.length);
       const projectCreate = await this.prisma.project.create({
         data: {
           ...projectData,
