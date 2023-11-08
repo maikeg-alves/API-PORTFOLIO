@@ -26,7 +26,7 @@ export class AuthService {
     private readonly mailSerivce: MailService,
   ) {}
 
-  async login(loginData: loginDTO): Promise<string> {
+  async login(loginData: loginDTO): Promise<{ token: string }> {
     try {
       const { email, password } = loginData;
 
@@ -48,7 +48,7 @@ export class AuthService {
 
       const token = await this.grantAccessToken(user);
 
-      return token;
+      return { token };
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
         if (error.code === PrismaError.UniqueConstraintViolation) {
