@@ -143,7 +143,7 @@ export class AuthService {
     }
   }
 
-  async verifyCodeRecovery(code: string): Promise<string> {
+  async verifyCodeRecovery(code: string): Promise<{ recoveryToken: string }> {
     try {
       if (!code || !/^[0-9]{6}$/.test(code)) {
         throw new AuthExceptions.CodeIncorrect();
@@ -179,7 +179,9 @@ export class AuthService {
         throw new AuthExceptions.UserNotFound();
       }
 
-      return await this.grantAccessToken(user);
+      const recoveryToken = await this.grantAccessToken(user);
+
+      return { recoveryToken: recoveryToken };
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
         if (error.code === PrismaError.UniqueConstraintViolation) {

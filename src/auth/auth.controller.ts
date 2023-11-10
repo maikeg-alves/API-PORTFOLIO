@@ -41,7 +41,9 @@ export class AuthController {
   }
 
   @Get('recovery/confirm/:code')
-  async confirmCode(@Param('code') code: string): Promise<string> {
+  async confirmCode(
+    @Param('code') code: string,
+  ): Promise<{ recoveryToken: string }> {
     return await this.authService.verifyCodeRecovery(code);
   }
 
