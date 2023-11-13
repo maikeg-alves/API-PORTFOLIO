@@ -12,6 +12,11 @@
     "baseUrl": "./",
     "incremental": true,
     "skipLibCheck": true,
-    "strictPropertyInitialization": false
+    "strictPropertyInitialization": false,
+    "paths": {
+      "@common/*": ["./src/common/*"],
+      "@mail/*": ["./src/mail/*"],
+      "@config": ["./src/config"]
+    }
   }
 }

@@ -1,15 +1,15 @@
 import { HttpException, HttpStatus, Injectable, Req } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from 'src/config/prisma/prisma.service';
 import { signUpDTO } from './dto/signup.dto';
 import { ConfigService } from '@nestjs/config';
 import { UserDTO } from './dto/user.dto';
 import { JwtService } from '@nestjs/jwt';
-import { MailService } from 'src/mail/mail.service';
+import { MailService } from '@mail/mail.service';
 import { AccessPayload, FullAccessPayload, TokenType } from './dto/jwt.dto';
 import { JsonWebTokenError, TokenExpiredError } from 'jsonwebtoken';
 import * as AuthExceptions from './exceptions/auth.execptions';
-import { PrismaError } from 'src/prisma/error/prisma.erros';
+import { PrismaError } from 'src/config/prisma/error/prisma.erros';
 import { loginDTO } from './dto/login.dto';
 import { resetPasswordDTO } from './dto/resetPassword.dto';
 
@@ -25,6 +25,16 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly mailSerivce: MailService,
   ) {}
+
+  private generateRandomCode(length: number) {
+    const chars = '0123456789';
+    let code = '';
+    for (let i = 0; i < length; i++) {
+      const randomIndex = Math.floor(Math.random() * chars.length);
+      code += chars[randomIndex];
+    }
+    return code;
+  }
 
   async login(loginData: loginDTO): Promise<{ token: string }> {
     try {
@@ -296,7 +306,7 @@ export class AuthService {
           activated: true,
         },
         where: {
-          id: +id,
+          id: id,
           email: email,
         },
       });
@@ -341,15 +351,5 @@ export class AuthService {
     }
 
     return payload;
-  }
-
-  generateRandomCode(length: number) {
-    const chars = '0123456789'; // Caracteres permitidos no código
-    let code = '';
-    for (let i = 0; i < length; i++) {
-      const randomIndex = Math.floor(Math.random() * chars.length);
-      code += chars[randomIndex];
-    }
-    return code;
   }
 }

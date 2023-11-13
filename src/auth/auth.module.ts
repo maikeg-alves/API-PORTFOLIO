@@ -2,9 +2,9 @@ import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { PrismaModule } from 'src/prisma/prisma.module';
+import { PrismaModule } from 'src/config/prisma/prisma.module';
 import { ConfigService } from '@nestjs/config';
-import { MailModule } from 'src/mail/mail.module';
+import { MailModule } from '@mail/mail.module';
 import { JwtGuard } from './guards/jwt.gurds';
 
 @Module({

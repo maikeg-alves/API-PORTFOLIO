@@ -9,7 +9,7 @@ import {
 
 export class UserDTO {
   @IsInt()
-  id: number;
+  id: string;
 
   @IsDate()
   createdAt: Date;

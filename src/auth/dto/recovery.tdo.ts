@@ -5,7 +5,7 @@ export class RecoveryDTO {
   id: number;
 
   @IsInt()
-  userId: number;
+  userId: string;
 
   @IsEmail()
   userEmail: string;

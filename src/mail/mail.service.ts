@@ -13,7 +13,7 @@ export class MailService {
     await this.mailerService.sendMail({
       to: user.email,
       subject: 'Welcome to Nice App! Confirm your Email',
-      template: './confirmation',
+      template: 'confirmation.hbs',
       context: {
         name: user.email,
         url,
@@ -26,7 +26,7 @@ export class MailService {
     await this.mailerService.sendMail({
       to: recovery.userEmail,
       subject: 'Codigo de confor de recuperação de conta',
-      template: './recoverycode',
+      template: 'recoverycode.hbs',
       context: {
         code,
         expiration,

@@ -1,8 +1,8 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from 'src/config/prisma/prisma.service';
 import * as ProjectExceptions from './exceptions/project.excpetion';
 import { ProjectDTO } from './dto/project.dto';
-import { PrismaError } from 'src/prisma/error/prisma.erros';
+import { PrismaError } from 'src/config/prisma/error/prisma.erros';
 import { TechService } from 'src/tech/tech.service';
 import { ProjectAndTechsDTO } from './dto/projectsAndTechs.dto';
 import { TechDTO } from 'src/tech/dto/tech.dto';
