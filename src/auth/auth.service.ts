@@ -36,7 +36,7 @@ export class AuthService {
     return code;
   }
 
-  async login(loginData: loginDTO): Promise<{ token: string }> {
+  async login(loginData: loginDTO): Promise<UserDTO> {
     try {
       const { email, password } = loginData;
 
@@ -56,9 +56,15 @@ export class AuthService {
         throw new AuthExceptions.InvalidCredentials();
       }
 
-      const token = await this.grantAccessToken(user);
+      if (!user.activated) {
+        throw new AuthExceptions.UserDisabled();
+      }
 
-      return { token };
+      delete user.hash;
+      delete user.otp_base32;
+      delete user.otp_auth_url;
+
+      return user;
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
         if (error.code === PrismaError.UniqueConstraintViolation) {

@@ -34,4 +34,28 @@ export class UserDTO {
   @IsString()
   @IsOptional()
   lastName?: string;
+
+  @IsBoolean()
+  @IsOptional()
+  otp_enabled?: boolean;
+
+  @IsBoolean()
+  @IsOptional()
+  otp_verified?: boolean;
+
+  @IsString()
+  @IsOptional()
+  otp_ascii?: string;
+
+  @IsString()
+  @IsOptional()
+  otp_hex?: string;
+
+  @IsString()
+  @IsOptional()
+  otp_base32?: string;
+
+  @IsString()
+  @IsOptional()
+  otp_auth_url?: string;
 }

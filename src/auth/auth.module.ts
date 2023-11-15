@@ -6,6 +6,8 @@ import { PrismaModule } from 'src/config/prisma/prisma.module';
 import { ConfigService } from '@nestjs/config';
 import { MailModule } from '@mail/mail.module';
 import { JwtGuard } from './guards/jwt.gurds';
+import { OTPService } from './services/otp.service';
+/* import { OTPModule } from './services/otp.module'; */
 
 @Module({
   imports: [
@@ -18,8 +20,8 @@ import { JwtGuard } from './guards/jwt.gurds';
     PrismaModule,
     MailModule,
   ],
-  providers: [AuthService, JwtGuard],
+  providers: [AuthService, JwtGuard, OTPService],
   controllers: [AuthController],
-  exports: [AuthService],
+  exports: [AuthService, OTPService],
 })
 export class AuthModule {}

@@ -15,13 +15,18 @@ import { UserDTO } from './dto/user.dto';
 import { loginDTO } from './dto/login.dto';
 import { resetPasswordDTO } from './dto/resetPassword.dto';
 import { JwtGuard } from './guards/jwt.gurds';
+import { OTPService } from './services/otp.service';
+import { DTOverify } from './services/dto/verify.dto';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly otpService: OTPService,
+  ) {}
 
   @Post('login')
-  async loginUser(@Body() loginData: loginDTO): Promise<{ token: string }> {
+  async loginUser(@Body() loginData: loginDTO): Promise<UserDTO> {
     return await this.authService.login(loginData);
   }
 
@@ -54,5 +59,24 @@ export class AuthController {
     @Req() request,
   ) {
     return await this.authService.resetUserPassword(resetPasswordData, request);
+  }
+
+  @Post('otp/generate')
+  async GenerateOTP(@Body('user_id') user_id: string) {
+    return await this.otpService.GenerateOTP(user_id);
+  }
+  @Post('otp/verify')
+  async VerifyOTP(@Body() otpData: DTOverify) {
+    return await this.otpService.VerifyOTP(otpData.user_id, otpData.token);
+  }
+
+  @Post('otp/validate')
+  async ValidateOTP(@Body() otpData: DTOverify): Promise<{ token: string }> {
+    return await this.otpService.ValidateOTP(otpData.user_id, otpData.token);
+  }
+
+  @Post('otp/disable')
+  async DisableOTP(user_id: string) {
+    return await this.otpService.DisableOTP(user_id);
   }
 }
