@@ -6,6 +6,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
   UseGuards,
   UsePipes,
   ValidationPipe,
@@ -19,13 +20,18 @@ export class TechController {
   constructor(private readonly techService: TechService) {}
 
   @Get(':id')
-  getOneTech(@Param('id') id: string): Promise<TechDTO | null> {
-    return this.techService.getOneTech(id);
+  getOneTech(
+    @Param('id') id: string,
+    @Query('viewProjects') viewProjects?: boolean,
+  ): Promise<TechDTO | null> {
+    return this.techService.getOneTech(id, viewProjects);
   }
 
   @Get()
-  getTechs(): Promise<TechDTO[] | null> {
-    return this.techService.getTechs();
+  getTechs(
+    @Query('viewProjects') viewProjects?: boolean,
+  ): Promise<TechDTO[] | null> {
+    return this.techService.getTechs(viewProjects);
   }
 
   @Post('create')

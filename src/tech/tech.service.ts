@@ -8,9 +8,9 @@ import { PrismaError } from 'src/config/prisma/error/prisma.erros';
 export class TechService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getTechs(): Promise<TechDTO[] | null> {
+  async getTechs(viewProjects?: boolean): Promise<TechDTO[] | null> {
     try {
-      const getTechs = await this.findTech();
+      const getTechs = await this.findTech(null, viewProjects);
 
       if (
         !getTechs ||
@@ -41,9 +41,12 @@ export class TechService {
     }
   }
 
-  async getOneTech(id: string): Promise<TechDTO | null> {
+  async getOneTech(
+    id: string,
+    viewProjects?: boolean,
+  ): Promise<TechDTO | null> {
     try {
-      const getTech = await this.findTech(id);
+      const getTech = await this.findTech(id, viewProjects);
 
       if (!getTech || Array.isArray(getTech))
         throw new TechExceptions.TechNotFoundException();
@@ -169,13 +172,21 @@ export class TechService {
     }
   }
 
-  async findTech(techId?: string): Promise<TechDTO | TechDTO[] | null> {
+  async findTech(
+    techId?: string,
+    viewProjects?: boolean,
+  ): Promise<TechDTO | TechDTO[] | null> {
     try {
+      const includeProjects = viewProjects ? { projects: true } : {};
+
       if (!techId) {
-        return (await this.prisma.tech.findMany()) as TechDTO[] | null;
+        return (await this.prisma.tech.findMany({
+          include: includeProjects,
+        })) as TechDTO[] | null;
       }
       return (await this.prisma.tech.findUnique({
         where: { id: +techId },
+        include: includeProjects,
       })) as TechDTO | null;
     } catch (error) {
       console.error(error.code);
