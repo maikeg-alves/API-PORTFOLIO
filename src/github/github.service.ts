@@ -49,7 +49,8 @@ export class GithubService {
         homepage: repo.homepage,
         created_at: repo.created_at,
         pushed_at: repo.pushed_at,
-      };
+        language: repo.language,
+      } as GitHubDTO;
 
       return repoData;
     } catch (error) {
@@ -100,10 +101,13 @@ export class GithubService {
 
       const repos = (await response.json()) as SearchGitHubDTO[];
 
-      const rebilledRepos: SearchGitHubDTO[] = repos.map(({ id, name }) => ({
-        id,
-        name,
-      }));
+      const rebilledRepos: SearchGitHubDTO[] = repos.map(
+        ({ id, name, language }) => ({
+          id,
+          name,
+          language,
+        }),
+      );
 
       return rebilledRepos;
     } catch (error) {

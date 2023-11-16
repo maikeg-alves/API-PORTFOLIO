@@ -1,4 +1,4 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { GithubService } from './github.service';
 import { GitHubDTO, SearchGitHubDTO } from './dto/github.dto';
 

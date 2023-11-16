@@ -28,6 +28,10 @@ export class GitHubDTO {
   @IsNotEmpty()
   @IsString()
   description: string; // description
+
+  @IsNotEmpty()
+  @IsString()
+  language: string;
 }
 
 export class SearchGitHubDTO {
@@ -38,4 +42,8 @@ export class SearchGitHubDTO {
   @IsNotEmpty()
   @IsString()
   name: string; // githubRepoId
+
+  @IsNotEmpty()
+  @IsString()
+  language: string;
 }
